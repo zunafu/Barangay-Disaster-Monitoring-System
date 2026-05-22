@@ -189,6 +189,7 @@ After database setup, use these default credentials:
 ### ✨ More Features
 *Community panel for Voting, Public Chat and Announcements and Account Settings*
 
+
 <div align="center">
 <img width="371" height="917" alt="Mobile View 1" src="https://github.com/user-attachments/assets/39d7546b-bfbb-47e7-952f-4cb61edf84fa" />
 <img width="361" height="916" alt="Mobile View 2" src="https://github.com/user-attachments/assets/de1f2584-5159-4627-91c3-f5f0e4f368d3" />
@@ -217,9 +218,19 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues, questions, or suggestions:
 - Open an issue on GitHub
-- Contact the development team at [franzgeoffrivera@gmail.com]
+- Contact the development team at [your-email@example.com]
 
-## 🙏 Acknowledgments
+## � Development Team
+
+This project was developed by:
+- **Franz Geoff Rivera**
+- **Michael Ainjelo Maglaya**
+- **Luisito Angelo Ocray**
+- **Djanaisah Benito**
+
+Lead Developer: **Franz Geoff Rivera**
+
+## �🙏 Acknowledgments
 
 - Geoapify for location services
 - Font Awesome for icons
