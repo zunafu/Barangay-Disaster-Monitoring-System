@@ -149,32 +149,53 @@ After database setup, use these default credentials:
 
 ## 📸 Screenshots
 
-For Users
-<img width="1918" height="920" alt="image" src="https://github.com/user-attachments/assets/4a752f8c-6e93-4a8d-94be-51af1ea3e563" />
-<img width="1919" height="918" alt="image" src="https://github.com/user-attachments/assets/e6289504-1e5e-468e-b078-a58b6a918935" />
-<img width="1919" height="920" alt="image" src="https://github.com/user-attachments/assets/2e6e2d74-05d8-4da6-a65f-01657333c983" />
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/daf7bfdb-5612-4e07-8159-534b8b2c3d92" />
+### 👤 For Users
+*Report incidents, view real-time map, confirm reports, and engage in discussions*
 
-For Barangay
-<img width="1918" height="919" alt="image" src="https://github.com/user-attachments/assets/0ad9c69e-eb97-468b-a394-b8cb366c984d" />
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/5c255e7b-5647-4bc3-b51f-9179291e1b28" />
-<img width="1919" height="916" alt="image" src="https://github.com/user-attachments/assets/a7d4f842-112a-48eb-8f30-63af4ec9a199" />
-<img width="1919" height="921" alt="image" src="https://github.com/user-attachments/assets/c3e94192-527e-469f-8224-fcc3c7bd792a" />
+<div align="center">
+<img width="1918" height="920" alt="User Dashboard" src="https://github.com/user-attachments/assets/4a752f8c-6e93-4a8d-94be-51af1ea3e563" />
+<img width="1919" height="918" alt="Report Incident" src="https://github.com/user-attachments/assets/e6289504-1e5e-468e-b078-a58b6a918935" />
+<img width="1919" height="920" alt="Incident Map" src="https://github.com/user-attachments/assets/2e6e2d74-05d8-4da6-a65f-01657333c983" />
+<img width="1919" height="919" alt="Incident Details" src="https://github.com/user-attachments/assets/daf7bfdb-5612-4e07-8159-534b8b2c3d92" />
+</div>
 
-For Admin
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/8cd1ac90-4633-40a5-bcc9-fa1c90c9abf3" />
-<img width="1919" height="920" alt="image" src="https://github.com/user-attachments/assets/43820ab2-e1dd-4177-9647-72931f8554f4" />
-<img width="1919" height="915" alt="image" src="https://github.com/user-attachments/assets/784baee2-4adf-4071-ad4d-a9fcead9a5f4" />
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/a8c99429-052d-413e-9565-565c07e0712d" />
-<img width="1919" height="919" alt="image" src="https://github.com/user-attachments/assets/7c94c74a-88b0-4b46-9527-53fff67170a2" />
+---
 
+### 🏛️ For Barangay Officers
+*Manage local incidents, update status, assign severity, and coordinate response*
 
-Added Features
-<img width="371" height="917" alt="image" src="https://github.com/user-attachments/assets/39d7546b-bfbb-47e7-952f-4cb61edf84fa" />
-<img width="361" height="916" alt="image" src="https://github.com/user-attachments/assets/de1f2584-5159-4627-91c3-f5f0e4f368d3" />
-<img width="368" height="914" alt="image" src="https://github.com/user-attachments/assets/1f4b83c7-95e6-4d77-a26c-513545dcd4fc" />
-<img width="1919" height="917" alt="image" src="https://github.com/user-attachments/assets/54502d43-28f9-4528-acae-395a6affb14f" />
-<img width="1919" height="917" alt="image" src="https://github.com/user-attachments/assets/6cc926fc-1eb6-4fcc-86e8-f96762007758" />
+<div align="center">
+<img width="1918" height="919" alt="Barangay Dashboard" src="https://github.com/user-attachments/assets/0ad9c69e-eb97-468b-a394-b8cb366c984d" />
+<img width="1919" height="919" alt="Incident Management" src="https://github.com/user-attachments/assets/5c255e7b-5647-4bc3-b51f-9179291e1b28" />
+<img width="1919" height="916" alt="Status Updates" src="https://github.com/user-attachments/assets/a7d4f842-112a-48eb-8f30-63af4ec9a199" />
+<img width="1919" height="921" alt="Severity Assignment" src="https://github.com/user-attachments/assets/c3e94192-527e-469f-8224-fcc3c7bd792a" />
+</div>
+
+---
+
+### 🔐 For Administrators
+*Complete system control, user management, audit logs, and comprehensive analytics*
+
+<div align="center">
+<img width="1919" height="919" alt="Admin Dashboard" src="https://github.com/user-attachments/assets/8cd1ac90-4633-40a5-bcc9-fa1c90c9abf3" />
+<img width="1919" height="920" alt="User Management" src="https://github.com/user-attachments/assets/43820ab2-e1dd-4177-9647-72931f8554f4" />
+<img width="1919" height="915" alt="System Statistics" src="https://github.com/user-attachments/assets/784baee2-4adf-4071-ad4d-a9fcead9a5f4" />
+<img width="1919" height="919" alt="Audit Logs" src="https://github.com/user-attachments/assets/a8c99429-052d-413e-9565-565c07e0712d" />
+<img width="1919" height="919" alt="Admin Controls" src="https://github.com/user-attachments/assets/7c94c74a-88b0-4b46-9527-53fff67170a2" />
+</div>
+
+---
+
+### ✨ Added Features
+*Enhanced mobile responsiveness, real-time notifications, and advanced filtering*
+
+<div align="center">
+<img width="371" height="917" alt="Mobile View 1" src="https://github.com/user-attachments/assets/39d7546b-bfbb-47e7-952f-4cb61edf84fa" />
+<img width="361" height="916" alt="Mobile View 2" src="https://github.com/user-attachments/assets/de1f2584-5159-4627-91c3-f5f0e4f368d3" />
+<img width="368" height="914" alt="Mobile View 3" src="https://github.com/user-attachments/assets/1f4b83c7-95e6-4d77-a26c-513545dcd4fc" />
+<img width="1919" height="917" alt="Advanced Filtering" src="https://github.com/user-attachments/assets/54502d43-28f9-4528-acae-395a6affb14f" />
+<img width="1919" height="917" alt="Real-time Updates" src="https://github.com/user-attachments/assets/6cc926fc-1eb6-4fcc-86e8-f96762007758" />
+</div>
 
 
 
