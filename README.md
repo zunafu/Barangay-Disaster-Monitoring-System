@@ -228,8 +228,6 @@ This project was developed by:
 - **Luisito Angelo Ocray**
 - **Djanaisah Benito**
 
-Lead Developer: **Franz Geoff Rivera**
-
 ## �🙏 Acknowledgments
 
 - Geoapify for location services
