@@ -186,8 +186,8 @@ After database setup, use these default credentials:
 
 ---
 
-### ✨ Added Features
-*Enhanced mobile responsiveness, real-time notifications, and advanced filtering*
+### ✨ More Features
+*Community panel for Voting, Public Chat and Announcements and Account Settings*
 
 <div align="center">
 <img width="371" height="917" alt="Mobile View 1" src="https://github.com/user-attachments/assets/39d7546b-bfbb-47e7-952f-4cb61edf84fa" />
