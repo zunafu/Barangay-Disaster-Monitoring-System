@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Panel - Disaster Monitoring System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .barangay-container {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            overflow: visible;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            overflow-x: auto;
+            overflow-y: visible;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .sidebar-header {
+            padding: 0;
+            border-bottom: none;
+            margin-bottom: 0;
+            flex-shrink: 0;
+            margin-right: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0;
+            opacity: 0;
+            display: none;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            gap: 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .sidebar-menu i {
+            width: auto;
+            text-align: center;
+        }
+
+        .logout-btn {
+            margin-top: 0;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Hamburger Menu Button */
+        .barangay-hamburger {
+            display: none;
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 0.65rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+            font-size: 1.1rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .barangay-hamburger:hover {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            transform: scale(1.08);
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Back to Main Button in Sidebar */
+        .back-to-main-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .back-to-main-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            height: auto;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            gap: 0.75rem;
+        }
+
+        .topbar-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .back-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #059669;
+            transform: translateX(-2px);
+        }
+
+        .topbar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .barangay-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .barangay-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #10b981;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            gap: 0.75rem;
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-reported {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-responding {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .status-in_area {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .severity-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .severity-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .severity-high {
+            background: #fed7aa;
+            color: #b45309;
+        }
+
+        .severity-critical {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .severity-neutral {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .pagination-btn:hover,
+        .pagination-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading and Messages */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 767px) {
+            .barangay-hamburger {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 280px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+                flex-direction: column;
+                padding: 1rem 0;
+                overflow-y: auto;
+            }
+
+            .sidebar-header {
+                padding: 0 1rem 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-subtitle {
+                font-size: 0.875rem;
+                opacity: 0.9;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-menu {
+                flex-direction: column;
+                overflow-x: visible;
+                overflow-y: auto;
+                gap: 0;
+            }
+
+            .sidebar-menu li {
+                margin: 0;
+                white-space: normal;
+            }
+
+            .sidebar-menu a {
+                border-bottom: none;
+                border-left: 4px solid transparent;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active {
+                border-left-color: white;
+                border-bottom-color: transparent;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .topbar {
+                padding-left: 3.5rem;
+            }
+
+            .topbar-left {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        /* Responsive - Tablet and above */
+        @media (min-width: 768px) {
+            .barangay-hamburger {
+                display: none !important;
+            }
+
+            .barangay-container {
+                flex-direction: row;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .sidebar {
+                width: 200px;
+                padding: 1rem 0;
+                flex-direction: column;
+                position: relative;
+                top: auto;
+                z-index: 10;
+                overflow-y: auto;
+                overflow-x: visible;
+            }
+
+            .sidebar-header {
+                padding: 0 1rem 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-subtitle {
+                font-size: 0.875rem;
+                opacity: 0.9;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-title {
+                font-size: 1.25rem;
+            }
+
+            .sidebar-menu {
+                flex-direction: column;
+                overflow-x: visible;
+            }
+
+            .sidebar-menu a {
+                border-bottom: none;
+                border-left: 4px solid transparent;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active {
+                border-left-color: white;
+                border-bottom-color: transparent;
+            }
+
+            .logout-btn {
+                margin: 1rem;
+                margin-top: auto;
+                width: calc(100% - 2rem);
+            }
+
+            .main-content {
+                overflow: hidden;
+                height: 100vh;
+            }
+
+            .topbar {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem 2rem;
+                gap: 0;
+            }
+
+            .topbar-left {
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .topbar-title {
+                font-size: 1.5rem;
+            }
+
+            .barangay-user {
+                gap: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+
+            .barangay-user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .content-area {
+                padding: 2rem;
+            }
+
+            .table-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+
+            .table-controls {
+                flex-direction: row;
+                gap: 1rem;
+                align-items: center;
+                width: auto;
+            }
+
+            .search-input {
+                width: 250px;
+            }
+
+            .modal-content {
+                width: 90%;
+                max-width: 500px;
+                padding: 2rem;
+            }
+
+            .modal-header {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.95rem;
+                gap: 0.5rem;
+            }
+
+            table {
+                font-size: 0.95rem;
+            }
+
+            th {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+
+            td {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar {
+                width: 280px;
+            }
+
+            .sidebar-header {
+                padding: 0 2rem 2rem;
+            }
+
+            .sidebar-menu a {
+                padding: 1rem 2rem;
+                gap: 1rem;
+            }
+
+            .logout-btn {
+                margin: 2rem;
+                margin-top: auto;
+                width: calc(100% - 4rem);
+            }
+
+            .topbar {
+                padding: 1.5rem 2rem;
+            }
+
+            .content-area {
+                padding: 2rem;
+            }
+
+            .search-input {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="barangay-container">
+        <!-- Hamburger Menu (Mobile Only) -->
+        <button class="barangay-hamburger" id="barangayHamburger" title="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="barangaySidebar">
+            <div class="sidebar-header">
+                <button class="back-to-main-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Main
+                </button>
+                <div class="sidebar-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Barangay Panel
+                </div>
+                <div class="sidebar-subtitle">Disaster Monitoring System</div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><a onclick="switchSection('incident_logs', this)" class="menu-item active">
+                        <i class="fas fa-history"></i>
+                        <span>Incident Logs</span>
+                    </a></li>
+            </ul>
+
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title" id="pageTitle">Incident Logs</div>
+                </div>
+                <div class="barangay-user">
+                    <div class="barangay-user-avatar" id="userInitial">B</div>
+                    <div>
+                        <div id="barangayName" style="font-weight: 600;">Barangay User</div>
+                        <div style="font-size: 0.85rem; color: #999;">Barangay Officer</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div id="alertContainer"></div>
+
+                <!-- Incident Logs Section -->
+                <div id="incident_logs" class="section active">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">Incident Operation Audit Logs</div>
+                            <div class="table-controls">
+                                <input type="date" id="auditDateFrom" onchange="loadIncidentLogs()" placeholder="From">
+                                <input type="date" id="auditDateTo" onchange="loadIncidentLogs()" placeholder="To">
+                                <select id="auditActionFilter" onchange="loadIncidentLogs()"
+                                    style="margin-left: 0.5rem;">
+                                    <option value="">All Actions</option>
+                                    <option value="CREATE">Create</option>
+                                    <option value="UPDATE">Update</option>
+                                    <option value="DELETE">Delete</option>
+                                    <option value="CONFIRM">Confirm</option>
+                                    <option value="REACT">React</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="exportIncidentLogs()"
+                                    style="margin-left: 0.5rem;">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="incidentLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Action</th>
+                                        <th>Incident ID</th>
+                                        <th>Details</th>
+                                        <th>Image</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incidentLogsBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="incidentLogsPagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBarangayUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check if user is barangay
+                const response = await fetch('/disaster-report/auth.php?action=check', { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`Authentication server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.authenticated || data.user.role !== 'barangay') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentBarangayUser = data.user;
+                document.getElementById('barangayName').textContent = data.user.full_name;
+                document.getElementById('userInitial').textContent = data.user.full_name.charAt(0).toUpperCase();
+
+                // Load incident logs
+                loadIncidentLogs();
+
+                // Hamburger menu for mobile
+                const barangayHamburger = document.getElementById('barangayHamburger');
+                const barangaySidebar = document.getElementById('barangaySidebar');
+                if (barangayHamburger) {
+                    barangayHamburger.addEventListener('click', () => {
+                        barangaySidebar.classList.toggle('open');
+                    });
+                }
+
+                // Close sidebar when clicking on menu items
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                            barangaySidebar.classList.remove('open');
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showAlert('Failed to initialize barangay panel: ' + error.message, 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        });
+
+        // Switch sections
+        function switchSection(section, element) {
+            // Update active menu item
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(section).classList.add('active');
+
+            // Update page title
+            const titles = {
+                incident_logs: 'Incident Logs'
+            };
+            document.getElementById('pageTitle').textContent = titles[section];
+
+            // Load data for section
+            if (section === 'incident_logs') loadIncidentLogs();
+        }
+
+        // Incident Logs Functions
+        async function loadIncidentLogs(page = 1) {
+            try {
+                const dateFrom = document.getElementById('auditDateFrom').value || '';
+                const dateTo = document.getElementById('auditDateTo').value || '';
+                const actionType = document.getElementById('auditActionFilter').value || '';
+
+                const params = new URLSearchParams({
+                    action: 'get_audit_logs',
+                    page: page,
+                    limit: 50,
+                    entity_type: 'incident',
+                    ...(dateFrom && { date_from: dateFrom }),
+                    ...(dateTo && { date_to: dateTo }),
+                    ...(actionType && { action_type: actionType })
+                });
+
+                const response = await fetch(`/disaster-report/api.php?${params.toString()}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (!data.success) {
+                    showAlert('Error loading incident logs', 'error');
+                    return;
+                }
+
+                const tbody = document.getElementById('incidentLogsBody');
+                tbody.innerHTML = '';
+
+                if (data.logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No incident logs found</td></tr>';
+                    return;
+                }
+
+                data.logs.forEach(log => {
+                    const row = document.createElement('tr');
+                    const timestamp = new Date(log.created_at).toLocaleString();
+
+                    let detailsText = log.details || '';
+                    if (log.old_value || log.new_value) {
+                        detailsText += ` [${log.old_value ? 'Before: ' + log.old_value.substring(0, 30) + '...' : ''} ${log.new_value ? 'After: ' + log.new_value.substring(0, 30) + '...' : ''}]`;
+                    }
+
+                    const imageCell = log.image_path ?
+                        `<img src="${log.image_path}" style="max-width: 50px; max-height: 50px; cursor: pointer; border-radius: 4px;" onclick="viewIncidentImage('${log.image_path}')">` :
+                        '-';
+
+                    row.innerHTML = `
+                        <td>${timestamp}</td>
+                        <td>${log.user_name || 'System'}</td>
+                        <td><span class="badge" style="background: ${getRoleBadgeColor(log.user_role)};">${log.user_role || 'N/A'}</span></td>
+                        <td><span class="badge" style="background: ${getActionBadgeColor(log.action_type)};">${log.action_type}</span></td>
+                        <td>#${log.entity_id}</td>
+                        <td><small>${detailsText}</small></td>
+                        <td>${imageCell}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Update pagination
+                const pagination = document.getElementById('incidentLogsPagination');
+                pagination.innerHTML = '';
+                for (let i = 1; i <= data.pages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.className = 'pagination-btn' + (i === page ? ' active' : '');
+                    btn.onclick = () => loadIncidentLogs(i);
+                    pagination.appendChild(btn);
+                }
+            } catch (error) {
+                console.error('Error loading incident logs:', error);
+                showAlert('Error loading incident logs', 'error');
+            }
+        }
+
+        function getRoleBadgeColor(role) {
+            const colors = {
+                admin: '#667eea',
+                barangay: '#f6ad55',
+                user: '#48bb78'
+            };
+            return colors[role] || '#ccc';
+        }
+
+        function getActionBadgeColor(action) {
+            const colors = {
+                CREATE: '#48bb78',
+                UPDATE: '#4299e1',
+                DELETE: '#f56565',
+                CONFIRM: '#805ad5',
+                REACT: '#ed8936'
+            };
+            return colors[action] || '#ccc';
+        }
+
+        function viewIncidentImage(imagePath) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.onclick = () => modal.remove();
+            modal.innerHTML = `
+                <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 90%; max-height: 90%;" onclick="event.stopPropagation()">
+                    <img src="${imagePath}" style="width: 100%; height: auto; border-radius: 8px;">
+                    <button onclick="this.closest('.modal').remove()" style="position: absolute; top: 10px; right: 10px; background: #333; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function exportIncidentLogs() {
+            const table = document.getElementById('incidentLogsTable');
+            let csv = 'Time,User,Role,Action,Incident ID,Details\n';
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0 && cells[0].textContent !== 'No incident logs found') {
+                    const data = [
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        cells[4].textContent,
+                        cells[5].textContent.replace(/"/g, '""')
+                    ];
+                    csv += `"${data.join('","')}"\n`;
+                }
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `incident_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Helper Functions
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.innerHTML = message;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                fetch('/disaster-report/auth.php?action=logout', { credentials: 'include' }).then(() => {
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,85 @@
+
+function deleteComment()
+{
+    global $pdo;
+
+    if (!isLoggedIn()) {
+        echo json_encode(['error' => 'Unauthorized']);
+        return;
+    }
+
+    $comment_id = $_POST['comment_id'] ?? 0;
+
+    // Verify the comment belongs to the current user
+    $stmt = $pdo->prepare("SELECT user_id FROM comments WHERE id = ?");
+    $stmt->execute([$comment_id]);
+    $comment = $stmt->fetch();
+
+    if (!$comment) {
+        echo json_encode(['error' => 'Comment not found']);
+        return;
+    }
+
+    if ($comment['user_id'] !== $_SESSION['user_id']) {
+        echo json_encode(['error' => 'You can only delete your own comments']);
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM comment_reactions WHERE comment_id = ?");
+        $stmt->execute([$comment_id]);
+        
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE parent_comment_id = ?");
+        $stmt->execute([$comment_id]);
+        
+        $stmt = $pdo->prepare("DELETE FROM comments WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['error' => 'Failed to delete comment']);
+    }
+}
+
+function deleteChatMessage()
+{
+    global $pdo;
+
+    if (!isLoggedIn()) {
+        echo json_encode(['error' => 'Unauthorized']);
+        return;
+    }
+
+    $message_id = $_POST['message_id'] ?? 0;
+
+    $stmt = $pdo->prepare("SELECT user_id FROM chat_messages WHERE id = ?");
+    $stmt->execute([$message_id]);
+    $message = $stmt->fetch();
+
+    if (!$message) {
+        echo json_encode(['error' => 'Message not found']);
+        return;
+    }
+
+    if ($message['user_id'] !== $_SESSION['user_id']) {
+        echo json_encode(['error' => 'You can only delete your own messages']);
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM chat_message_reactions WHERE message_id = ?");
+        $stmt->execute([$message_id]);
+        
+        $stmt = $pdo->prepare("DELETE FROM chat_messages WHERE parent_message_id = ?");
+        $stmt->execute([$message_id]);
+        
+        $stmt = $pdo->prepare("DELETE FROM chat_messages WHERE id = ?");
+        $stmt->execute([$message_id]);
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['error' => 'Failed to delete message']);
+    }
+}
+
+?>

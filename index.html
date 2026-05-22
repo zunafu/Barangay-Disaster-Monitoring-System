@@ -1,0 +1,2796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Reporting & Monitoring System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f9fafb;
+            color: var(--dark);
+            font-size: 16px;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .navbar h1 {
+            font-size: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .user-badge {
+            padding: 0.4rem 0.7rem;
+            background: var(--light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .role-badge {
+            padding: 0.15rem 0.4rem;
+            border-radius: 10px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 820px) {
+            .role-badge {
+                padding: 0.1rem 0.3rem;
+                font-size: 0.5rem;
+                border-radius: 8px;
+            }
+        }
+
+        .role-user {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-barangay {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e68900;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .container {
+            margin-top: 70px;
+            padding: 0.75rem;
+            max-width: 100%;
+            position: relative;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        #map {
+            width: 100%;
+            flex: 1 1 auto;
+            height: 100%;
+            min-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 11000;
+            /* ensure modals appear above map controls and sidebar */
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.65rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input-wrapper input {
+            padding-right: 2.75rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            font-size: 1rem;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .password-toggle:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            top: calc(80px + 5rem);
+            right: 1rem;
+            left: auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s;
+            z-index: 99999;
+            max-width: calc(100vw - 2rem);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        .disaster-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .icon-fire {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .icon-flood {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .icon-earthquake {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .icon-typhoon {
+            background: #e0e7ff;
+            color: #6366f1;
+        }
+
+        .icon-landslide {
+            background: #fce7f3;
+            color: #ec4899;
+        }
+
+        .icon-accident {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .icon-other {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        /* Marker circle & severity styles 🔧 */
+        .marker-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            position: relative;
+            overflow: visible;
+            /* allow badges to sit outside the circle */
+        }
+
+        /* Ensure Leaflet wrapper doesn't force a square box */
+        .leaflet-marker-icon.disaster-marker {
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: visible !important;
+            /* let badges overflow and show */
+        }
+
+        .marker-emoji {
+            line-height: 1;
+        }
+
+        .marker-severity-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(0, 0, 0, 0.06);
+            background: #ffffff;
+            /* single contrasting fill */
+            color: var(--dark);
+            z-index: 9999;
+            /* ensure badge appears on top */
+            pointer-events: none;
+            /* don't block clicks */
+        }
+
+        /* Severity color palette */
+        .severity-low {
+            background: #10b981;
+        }
+
+        .severity-medium {
+            background: #f59e0b;
+        }
+
+        .severity-high {
+            background: #ef4444;
+        }
+
+        .severity-critical {
+            background: #7f1d1d;
+        }
+
+        .severity-neutral {
+            background: #9ca3af;
+        }
+
+        /* Popup severity badge */
+        .severity-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            color: white;
+            display: inline-block;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .severity-badge.severity-low {
+            background: #10b981;
+        }
+
+        .severity-badge.severity-medium {
+            background: #f59e0b;
+            color: #1f2937;
+        }
+
+        .severity-badge.severity-high {
+            background: #ef4444;
+        }
+
+        .severity-badge.severity-critical {
+            background: #7f1d1d;
+        }
+
+        .severity-badge.severity-neutral {
+            background: #9ca3af;
+            color: white;
+        }
+
+        /* Small label wrapper used in lists (e.g., Voting tab) */
+        .badge-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        .badge-label .badge-key {
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: none;
+        }
+
+        /* Incident details badges layout */
+        .detail-badges {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .detail-badges .badge-col {
+            text-align: center;
+            min-width: 80px;
+        }
+
+        @media (max-width: 420px) {
+            .detail-badges {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .detail-badges .badge-col {
+                min-width: 0;
+            }
+
+            .navbar {
+                justify-content: flex-start;
+                gap: 0.5rem;
+            }
+
+            .nav-left {
+                flex: 1;
+            }
+
+            .nav-actions {
+                margin-left: auto;
+                gap: 0.3rem;
+            }
+        }
+
+        @media (min-width: 421px) {
+            .navbar {
+                padding: 1rem 1.5rem;
+            }
+
+            .navbar h1 {
+                font-size: 1.2rem;
+            }
+
+            .user-badge {
+                display: inline-block;
+            }
+
+            .container {
+                margin-top: 75px;
+                padding: 1rem;
+            }
+
+            #map {
+                min-height: 300px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .navbar h1 {
+                font-size: 1.5rem;
+            }
+
+            .user-info {
+                gap: 1rem;
+            }
+
+            .nav-actions {
+                gap: 1rem;
+            }
+
+            .container {
+                margin-top: 80px;
+                padding: 1rem;
+            }
+
+            #map {
+                min-height: 320px;
+                border-radius: 12px;
+            }
+
+            .modal-content {
+                padding: 2rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 0.75rem;
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .toast {
+                top: calc(72px + 2rem);
+                right: 1.5rem;
+                left: auto;
+                max-width: calc(100vw - 1rem);
+            }
+        }
+
+        /* Big circular icon in details */
+        .detail-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            color: white;
+        }
+
+        .incident-details {
+            padding: 1rem 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .incident-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .comments-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .comment {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .comment.reply {
+            margin-left: 2rem;
+            background: white;
+            border-left: 3px solid var(--primary);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            flex-wrap: wrap;
+        }
+
+        .comment-author {
+            font-weight: 600;
+        }
+
+        .comment-time {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .comment-action-btn:hover {
+            background: var(--border);
+        }
+
+        .comment-action-btn.active-like {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .comment-action-btn.active-dislike {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .reply-form {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .reply-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .reply-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .reply-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            display: none;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .auth-toggle a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-reported {
+            background: #6b7280;
+            color: white;
+        }
+
+        .status-responding {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-in_area {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .status-resolved {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .marker-status-badge {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 2px solid white;
+            z-index: 9999;
+            /* sit above the circle */
+            pointer-events: none;
+        }
+
+        .marker-reported {
+            background: #6b7280;
+            color: white;
+        }
+
+        .marker-responding {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .marker-in_area {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .leaflet-marker-icon.disaster-marker {
+            position: relative;
+        }
+
+        .confirmation-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--light);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .manage-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .manage-section h4 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .manage-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .status-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .severity-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .manage-controls>button:last-child {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .status-control select,
+        .severity-control select {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .status-control>button,
+        .severity-control>button {
+            flex: 1;
+        }
+
+        .status-control select {
+            border-color: var(--border);
+        }
+
+        .status-control select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .severity-control select {
+            background-color: #fffbf0;
+        }
+
+        .severity-control select:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+
+        @media (min-width: 721px) {
+            .manage-controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                gap: 1rem;
+                align-items: start;
+            }
+
+            .status-control {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .severity-control {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            .manage-controls>button:last-child {
+                grid-column: 1;
+                grid-row: 2;
+                width: fit-content;
+                margin-top: 0.5rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .navbar h1 {
+                font-size: 1.5rem;
+            }
+
+            .manage-controls {
+                grid-template-columns: 1fr;
+                align-items: stretch;
+            }
+
+            .status-control {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .severity-control {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .manage-controls>button:last-child {
+                grid-column: 1;
+                grid-row: 3;
+                width: 100%;
+            }
+
+            .status-control {
+                flex-direction: column;
+            }
+
+            .status-control select {
+                max-width: 100%;
+            }
+
+            .manage-section {
+                padding: 1rem;
+            }
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .legend h4 {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem 0;
+            font-size: 0.85rem;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .test-accounts {
+            background: #eff6ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .test-accounts h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .test-accounts p {
+            margin: 0.25rem 0;
+        }
+
+        .browse-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .browse-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #authModal .modal-content {
+            max-width: 500px;
+        }
+
+        #authModal .auth-header {
+            margin-bottom: 0;
+        }
+
+        #authModal .modal-header {
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .guest-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.6rem 1rem;
+            text-align: center;
+            position: fixed;
+            top: 80px;
+            left: 1rem;
+            right: 1rem;
+            box-sizing: border-box;
+            width: auto;
+            max-width: none;
+            border-radius: 10px;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        /* Hide guest banner when any modal is open */
+        .modal.active~#guestBanner,
+        .modal.show~#guestBanner {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .guest-banner p {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .guest-banner .btn {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .map-with-banner {
+            margin-top: 60px !important;
+        }
+
+        /* Map controls (locate, selection messages) */
+        .map-controls {
+            position: absolute;
+            right: 1rem;
+            top: calc(80px + 0.5rem);
+            bottom: auto;
+            /* default: top-right (consistent with guest banner layout) */
+            z-index: 7000 !important;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+            transition: top 160ms ease, right 160ms ease, bottom 160ms ease;
+        }
+
+        /* Zoom controls container (top-left) */
+        .zoom-controls {
+            position: absolute;
+            left: 1rem;
+            top: calc(80px + 0.5rem);
+            bottom: auto;
+            z-index: 7000 !important;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+            transition: top 160ms ease, left 160ms ease;
+        }
+
+        .zoom-btn {
+            background: white;
+            color: var(--dark);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+        }
+
+        .zoom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+        }
+
+        /* When the guest banner is visible, move the controls to the upper-right below the banner */
+        .guest-banner-visible .map-controls {
+            top: calc(72px + 0.5rem);
+            right: 0.5rem;
+            bottom: auto;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 820px) {
+
+            /* Mobile: make guest banner full-width at bottom */
+            .guest-banner {
+                left: 0;
+                right: 0;
+                transform: none;
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border-radius: 0;
+                top: auto;
+                bottom: 0;
+                z-index: 999;
+            }
+
+            /* Mobile: position map controls above guest banner */
+            .guest-banner-visible .map-controls {
+                bottom: calc(60px + 4rem);
+                right: 0.5rem;
+                top: auto;
+            }
+        }
+
+        /* Hamburger button in navbar */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hamburger {
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: inline-flex;
+        }
+
+        /* Hide the hamburger when the sidebar is open (mobile) */
+        #mainApp.sidebar-open .hamburger {
+            display: none !important;
+        }
+
+        @media (min-width: 821px) {
+            .hamburger {
+                display: none;
+            }
+
+            .map-controls {
+                display: flex !important;
+                right: 1rem;
+                bottom: calc(100% - 750px);
+                top: auto;
+            }
+
+            .zoom-controls {
+                display: flex !important;
+                left: 1rem;
+                top: calc(80px + 0.5rem);
+                bottom: auto;
+                flex-direction: column;
+            }
+
+            .guest-banner-visible .map-controls {
+                bottom: 1rem;
+                right: 1rem;
+                top: auto;
+            }
+
+            .guest-banner {
+                border-radius: 8px;
+                padding: 1rem;
+            }
+        }
+
+        /* Sidebar close (X) placed inside header */
+        .sidebar-close {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: none;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+            cursor: pointer;
+            z-index: 6100;
+        }
+
+        .sidebar-close i {
+            color: var(--dark);
+        }
+
+        .sidebar-close:hover {
+            transform: scale(1.03);
+        }
+
+        /* Sidebar (off canvas) */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            /* sit at the very top of the viewport */
+            height: 100vh;
+            width: 360px;
+            background: white;
+            z-index: 6000;
+            box-shadow: 8px 0 24px rgba(15, 23, 42, 0.12);
+            transform: translateX(-100%);
+            transition: transform 280ms ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .sidebar-tabs .tab {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sidebar-tabs .tab.active {
+            background: var(--light);
+            font-weight: 600;
+        }
+
+        .sidebar-content {
+            padding: 0.75rem;
+            overflow: auto;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: block;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .voting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+            background: white;
+            box-shadow: 0 2px 6px rgba(2, 6, 23, 0.05);
+        }
+
+        /* Voting item icon + left layout */
+        .voting-left {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .voting-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            background: white;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+        }
+
+        @media (min-width: 721px) {
+            .voting-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+        }
+
+        .voting-item .meta {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .voting-item.clickable {
+            cursor: pointer;
+            border: 3px solid var(--border);
+        }
+
+        .voting-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            background: var(--light);
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .confirm-count {
+            font-weight: 700;
+        }
+
+        .vote-btn {
+            display: none;
+        }
+
+        /* hide vote button - confirmations are read-only in listing */
+
+        /* Legend hidden by default and positioned at bottom-left of map; toggled via .show */
+        .legend {
+            display: none;
+            position: absolute;
+            left: 1rem;
+            bottom: 3.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 7200;
+            width: 220px;
+        }
+
+        .legend.show {
+            display: block;
+        }
+
+        /* Legend toggle button container (bottom-left inside map) */
+        .legend-control-container {
+            position: absolute;
+            left: 1rem;
+            bottom: 1rem;
+            z-index: 800;
+        }
+
+        /* Legend toggle button (bottom-left inside map) */
+        .legend-toggle {
+            position: relative;
+            border-radius: 999px;
+            padding: 0.45rem 0.6rem;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+            background: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            max-height: 50vh;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-message {
+            background: var(--light);
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: 3px solid var(--border);
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+        }
+
+        /* Subtle separation between chat messages in the Community tab */
+        .chat-message+.chat-message {
+            border-top: 3px solid var(--border);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+        }
+
+        /* Slight hover highlight to improve readability */
+        .chat-message:hover {
+            background: #fbfdff;
+            box-shadow: 0 1px 4px rgba(2, 6, 23, 0.04);
+        }
+
+        .chat-meta {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-action-btn-sm {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .chat-action-btn-sm:hover {
+            background: var(--border);
+        }
+
+        .chat-action-btn-sm.active-like {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .chat-action-btn-sm.active-dislike {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* Reaction button styling - like/dislike for chat and announcements */
+        .reaction-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .reaction-btn:hover {
+            background: none;
+        }
+
+        .reaction-btn:hover i {
+            transform: scale(1.15);
+        }
+
+        /* Like button active state - blue */
+        .reaction-btn.active-like i {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Dislike button active state - red */
+        .reaction-btn.active-dislike i {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .reaction-count {
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+            font-weight: 500;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .chat-form input {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* Responsive adjustments - MOBILE ONLY */
+        @media (max-width: 820px) {
+            .sidebar {
+                width: 100%;
+                height: 100vh;
+                top: 0;
+            }
+
+            .map-controls {
+                right: 0.5rem;
+                top: auto;
+                bottom: 0.75rem;
+            }
+
+            .zoom-controls {
+                left: 0.5rem;
+                top: calc(72px + 0.5rem);
+                bottom: auto;
+                flex-direction: column;
+            }
+
+            #zoomInBtn,
+            #zoomOutBtn {
+                display: none !important;
+            }
+
+            #locateBtn {
+                padding: 0.7rem 1rem;
+                font-size: 1.1rem;
+                margin-top: 0;
+                padding-top: 0.7rem;
+                border-top: none;
+            }
+
+            .navbar h1 {
+                font-size: 1rem;
+            }
+
+            /* When sidebar is open on mobile, hide map controls and leaflet zoom controls to prevent overlap */
+            #mainApp.sidebar-open .map-controls,
+            #mainApp.sidebar-open .zoom-controls,
+            #mainApp.sidebar-open .leaflet-control,
+            #mainApp.sidebar-open .leaflet-control-container,
+            #mainApp.sidebar-open .legend-toggle {
+                display: none !important;
+            }
+
+            #map {
+                min-height: calc(100vh - 140px);
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 0.75rem auto;
+            }
+
+            .legend {
+                position: absolute;
+                left: 1rem;
+                bottom: 3.5rem;
+            }
+        }
+
+        /* Ensure map controls and Leaflet zoom controls sit at the same level as the map */
+        .map-controls,
+        .legend-toggle {
+            z-index: 7000 !important;
+        }
+
+        /* Leaflet controls (zoom, etc.) should appear on top of the map but below overlays like the sidebar */
+        .leaflet-control,
+        .leaflet-control-container,
+        .leaflet-top .leaflet-control {
+            z-index: 7000 !important;
+        }
+
+        /* Explicitly hide the Leaflet zoom controls in case they're present */
+        .leaflet-control-zoom,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+
+        /* Hide map controls and Leaflet zoom controls when a modal is open */
+        body.modal-open .map-controls,
+        body.modal-open .leaflet-control,
+        body.modal-open .leaflet-control-container,
+        body.modal-open .legend-toggle {
+            display: none !important;
+        }
+
+        /* When sidebar is open on desktop, push main content to the right so it does not get covered */
+        @media (min-width: 821px) {
+
+            /* Static fixed left sidebar for desktop */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 360px;
+                background: white;
+                z-index: 6000;
+                box-shadow: 8px 0 24px rgba(15, 23, 42, 0.12);
+                transform: none;
+            }
+
+            .sidebar.open {
+                transform: none;
+            }
+
+            /* Hide the sidebar close button on desktop; it's not needed in static layout */
+            .sidebar-close {
+                display: none;
+            }
+
+            /* Ensure hamburger is hidden on desktop */
+            .hamburger {
+                display: none !important;
+            }
+
+            /* Reserve space and align elements only when the sidebar is open on desktop */
+            .sidebar-open .container {
+                margin-left: 360px;
+                transition: margin-left 200ms ease;
+            }
+
+            .sidebar-open .navbar {
+                left: 360px;
+                right: 0;
+                width: calc(100% - 360px);
+                transition: left 200ms ease, width 200ms ease;
+            }
+
+            /* Align guest banner to the map container when sidebar is open */
+            .sidebar-open .guest-banner {
+                left: calc(360px + 1rem);
+                right: 1rem;
+                transform: none;
+                width: auto;
+                max-width: calc(100% - 420px);
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+        }
+
+        .map-btn {
+            background: white;
+            border-radius: 10px;
+            padding: 0.8rem 1.1rem;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .map-btn .map-btn-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Highlighted, larger Report button */
+        #startReportBtn {
+            padding: 1rem 1.2rem;
+            font-size: 1.1rem;
+            border-radius: 999px;
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 12px 36px rgba(220, 38, 38, 0.22);
+            border: none;
+            transition: transform 140ms ease, box-shadow 140ms ease;
+        }
+
+        #startReportBtn i {
+            margin-right: 0.45rem;
+            font-size: 1.25rem;
+        }
+
+        #startReportBtn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 18px 48px rgba(220, 38, 38, 0.28);
+        }
+
+        /* Keep locate button compact */
+        #locateBtn {
+            padding: 0.45rem 0.65rem;
+            font-size: 0.92rem;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.15);
+            border: none;
+            transition: transform 140ms ease, box-shadow 140ms ease;
+            margin-top: 0.75rem;
+            padding-top: 0.9rem;
+            border-top: 1px solid var(--border);
+        }
+
+        #locateBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        /* border-radius: 999px;
+        } */
+
+        .map-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Account Settings Styles */
+        .profile-header {
+            text-align: center;
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-picture-section {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--light);
+            border: 4px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-picture-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .profile-picture-upload:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .profile-info h3 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin: 0.5rem 0;
+        }
+
+        .profile-info p {
+            color: #6b7280;
+            margin: 0.25rem 0;
+            font-size: 0.95rem;
+        }
+
+        .profile-role-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .settings-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .settings-section h4 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .settings-group {
+            margin-bottom: 1rem;
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .settings-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .settings-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .password-reset-section {
+            margin-top: 1.5rem;
+        }
+
+        .otp-request-form {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            display: none;
+        }
+
+        .otp-request-form.active {
+            display: block;
+        }
+
+        .otp-verify-form {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            display: none;
+        }
+
+        .otp-verify-form.active {
+            display: block;
+        }
+
+        .otp-input-group {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .otp-input-group input {
+            width: 100%;
+            max-width: 150px;
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 10px;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .otp-input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .settings-button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .settings-button-group button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-cancel {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border);
+        }
+
+        .btn-cancel:hover {
+            background: var(--border);
+        }
+
+        .profile-picture-input {
+            display: none;
+        }
+
+        .file-upload-hint {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .map-select-overlay {
+            position: absolute;
+            right: 0;
+            top: -44px;
+            transform: none;
+            background: rgba(31, 41, 55, 0.9);
+            color: white;
+            padding: 0.45rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            z-index: 5050;
+            display: none;
+            white-space: nowrap;
+        }
+
+        .map-select-overlay.active {
+            display: block;
+        }
+
+        /* Hidden helper class for quick actions */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Cursor crosshair while selecting location - desktop only */
+        /* On touch devices, use default cursor since they use fingers */
+        @media (hover: hover) and (pointer: fine) {
+            .map-select-mode {
+                cursor: crosshair !important;
+            }
+
+            /* Ensure crosshair applies to the Leaflet container specifically */
+            .leaflet-container.map-select-mode,
+            #map.map-select-mode {
+                cursor: crosshair !important;
+            }
+        }
+
+        /* Touch devices: use default cursor */
+        @media (hover: none) and (pointer: coarse) {
+
+            .map-select-mode,
+            .leaflet-container.map-select-mode,
+            #map.map-select-mode {
+                cursor: pointer !important;
+            }
+        }
+
+        .guest-banner {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .guest-banner .btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin: 0 0.25rem;
+        }
+
+        .map-with-banner {
+            margin-top: 100px !important;
+        }
+
+        .announcement-comment {
+            position: relative;
+        }
+
+        .announcement-comment.reply {
+            margin-left: 1.5rem;
+        }
+
+        @media (min-width: 769px) {
+            .guest-banner {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            .guest-banner .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                margin: 0 0.5rem;
+            }
+
+            .map-with-banner {
+                margin-top: 80px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="auth-header">
+                    <h1><i class="fas fa-shield-alt"></i> Disaster Monitor</h1>
+                </div>
+                <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <h2 style="margin-bottom: 1.5rem;">Login</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="loginPassword" required>
+                        <button type="button" class="password-toggle" data-target="loginPassword"
+                            title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <div class="auth-toggle">
+                    Don't have an account? <a href="#" id="showRegister">Register here</a> |
+                    <a href="#" id="showForgotPassword">Forgot password?</a>
+                </div>
+
+                <div class="test-accounts">
+                    <h4>Test Accounts:</h4>
+                    <p><strong>User:</strong> user@test.com</p>
+                    <p><strong>Barangay:</strong> barangay@test.com</p>
+                    <p><strong>Admin:</strong> admin@test.com</p>
+                    <p><strong>Password:</strong> password</p>
+                </div>
+            </form>
+
+            <!-- Forgot Password Request Form -->
+            <form id="forgotPasswordForm" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Reset Password</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Enter your email address and we'll send you a link to
+                    reset your password.</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="forgotPasswordEmail" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-envelope"></i> Send Reset Link
+                </button>
+                <div class="auth-toggle">
+                    <a href="#" id="backToLogin">Back to Login</a>
+                </div>
+            </form>
+
+            <!-- Password Reset Form -->
+            <form id="resetPasswordForm" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Create New Password</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Enter your new password below.</p>
+                <input type="hidden" id="resetToken">
+                <div class="form-group">
+                    <label>New Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="newPassword" required>
+                        <button type="button" class="password-toggle" data-target="newPassword"
+                            title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">
+                        At least 8 characters, 1 uppercase letter, 1 number
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="confirmNewPassword" required>
+                        <button type="button" class="password-toggle" data-target="confirmNewPassword"
+                            title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-key"></i> Reset Password
+                </button>
+                <div class="auth-toggle">
+                    <a href="#" id="backToLoginFromReset">Back to Login</a>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Register</h2>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="registerPassword" required>
+                        <button type="button" class="password-toggle" data-target="registerPassword"
+                            title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 0.5rem;">
+                        At least 8 characters, 1 uppercase letter, 1 number
+                    </small>
+                    <div id="passwordStrength" style="margin-top: 0.5rem; font-size: 0.85rem; display: none;">
+                        <div style="height: 4px; background: #e5e7eb; border-radius: 2px; margin-bottom: 0.25rem;">
+                            <div id="passwordStrengthBar"
+                                style="height: 100%; width: 0%; border-radius: 2px; transition: width 0.3s;"></div>
+                        </div>
+                        <span id="passwordStrengthText" style="color: #666;"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="registerPasswordConfirm" required>
+                        <button type="button" class="password-toggle" data-target="registerPasswordConfirm"
+                            title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+                <div class="auth-toggle">
+                    Already have an account? <a href="#" id="showLogin">Login here</a>
+                </div>
+            </form>
+
+            <!-- OTP Verification Form -->
+            <form id="otpForm" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Verify Email</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">Enter the 6-digit OTP sent to your email.</p>
+                <input type="hidden" id="otpEmail">
+                <div class="form-group">
+                    <label>One-Time Password (OTP)</label>
+                    <input type="text" id="otpInput" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required
+                        style="text-align: center; font-size: 1.5rem; letter-spacing: 10px;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-check"></i> Verify OTP
+                </button>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <p style="color: #666; font-size: 0.9rem;">Didn't receive the code?
+                        <a href="#" id="resendOtpBtn" style="color: #2563eb; text-decoration: none;">Resend OTP</a>
+                    </p>
+                </div>
+                <div class="auth-toggle">
+                    <a href="#" id="backToRegister">Back to Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp">
+        <!-- Guest Banner -->
+        <div id="guestBanner" class="guest-banner">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                You're browsing as a guest.
+                <button class="btn btn-primary" onclick="showAuthModal('login')">Login</button>
+                <button class="btn btn-outline" onclick="showAuthModal('register')"
+                    style="background: white; color: #667eea; border-color: white;">Register</button>
+                to report incidents
+            </p>
+        </div>
+
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button id="hamburgerBtn" class="map-btn hamburger" title="Open menu"><i
+                        class="fas fa-bars"></i></button>
+                <h1>
+                    <i class="fas fa-shield-alt"></i>
+                    Barangay Disaster Monitoring System
+                </h1>
+            </div>
+            <div class="nav-actions">
+                <div class="user-info" id="userInfo"></div>
+                <div id="authButtons"></div>
+            </div>
+
+            <!-- Sidebar (off-canvas) -->
+            <aside id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Community</h3>
+                    <!-- Close button (X) -->
+                    <button id="closeSidebar" class="sidebar-close" aria-label="Close sidebar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="sidebar-tabs">
+                    <button class="tab active" data-tab="voting">Voting</button>
+                    <button class="tab" data-tab="chat">Public Chat</button>
+                    <button class="tab" data-tab="announcements">Announcements</button>
+                </div>
+                <div class="sidebar-content">
+                    <div id="votingTab" class="tab-content">
+                        <div id="votingList">Loading…</div>
+                    </div>
+                    <div id="chatTab" class="tab-content hidden">
+                        <div id="chatMessages" class="chat-messages"></div>
+                        <form id="chatForm" class="chat-form">
+                            <input id="chatInput" type="text" placeholder="Say something to the community"
+                                autocomplete="off" />
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </form>
+                    </div>
+                    <div id="announcementsTab" class="tab-content hidden">
+                        <div id="announcementMessages" class="chat-messages"></div>
+                        <div id="announcementFormContainer" style="display: none;">
+                            <form id="announcementForm" class="chat-form">
+                                <input id="announcementInput" type="text" placeholder="Post an announcement"
+                                    autocomplete="off" />
+                                <button type="submit" class="btn btn-primary">Post</button>
+                            </form>
+                        </div>
+                        <div id="announcementUserMessage"
+                            style="padding: 1rem; color: #666; text-align: center; font-size: 0.9rem;">
+                            Only barangay and admin can post announcements. You can reply and react to announcements.
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </nav>
+
+        <!-- Main Container -->
+        <div class="container">
+            <div id="map">
+                <!-- Zoom controls (top-left inside map) -->
+                <div class="zoom-controls" id="zoomControls">
+                    <button id="zoomInBtn" class="map-btn map-btn-small zoom-btn" title="Zoom in">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button id="zoomOutBtn" class="map-btn map-btn-small zoom-btn" title="Zoom out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button id="locateBtn" class="map-btn map-btn-small" title="Return to your location">
+                        <i class="fas fa-location-arrow"></i>
+                    </button>
+                </div>
+
+                <!-- Map UI controls (top-right inside map) -->
+                <div class="map-controls" id="mapControls">
+                    <button id="startReportBtn" class="map-btn" title="Report an incident">
+                        <i class="fas fa-map-pin"></i> <span class="map-btn-label">Report Incident</span>
+                    </button>
+                    <!-- Use my location quick action (hidden until selection mode) -->
+                    <button id="useMyLocationBtn" class="map-btn map-btn-small hidden"
+                        title="Use your current location">
+                        <i class="fas fa-location-crosshairs"></i> <span class="map-btn-label">Use my location</span>
+                    </button>
+                    <button id="cancelSelectBtn" class="map-btn map-btn-small hidden" title="Cancel selection">
+                        <i class="fas fa-times-circle"></i> <span class="map-btn-label">Cancel</span>
+                    </button>
+                </div>
+
+                <!-- Legend toggle container (bottom-left inside map) -->
+                <div class="legend-control-container">
+                    <button id="legendToggleBtn" class="map-btn map-btn-small legend-toggle"
+                        title="Show disaster types">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+
+                <!-- Legend - shows disaster types (bottom-left inside map) -->
+                <div class="legend">
+                    <h4><i class="fas fa-info-circle"></i> Disaster Types</h4>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-fire"></div>
+                        <span>Fire</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-flood"></div>
+                        <span>Flood</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-earthquake"></div>
+                        <span>Earthquake</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-typhoon"></div>
+                        <span>Typhoon</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-landslide"></div>
+                        <span>Landslide</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon icon-accident"></div>
+                        <span>Accident</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Report Incident</h2>
+                <button class="close-btn" onclick="closeReportModal()">&times;</button>
+            </div>
+            <form id="reportForm">
+                <div class="form-group">
+                    <label>Disaster Type *</label>
+                    <select id="disasterType" required>
+                        <option value="">Select Type</option>
+                        <option value="fire">🔥 Fire</option>
+                        <option value="flood">🌊 Flood</option>
+                        <option value="earthquake">🏚️ Earthquake</option>
+                        <option value="typhoon">🌀 Typhoon</option>
+                        <option value="landslide">⛰️ Landslide</option>
+                        <option value="accident">🚗 Accident</option>
+                        <option value="other">❓ Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="reportTitle" placeholder="Brief title of the incident" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="reportDescription" placeholder="Describe what happened..." required></textarea>
+                </div>
+
+                <div class="form-group" id="severityFormGroup">
+                    <label>Severity *</label>
+                    <select id="reportSeverity" required>
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="locationFormGroup">
+                    <label>Location</label>
+                    <input type="text" id="reportAddress" readonly>
+                    <input type="hidden" id="reportLat">
+                    <input type="hidden" id="reportLng">
+                </div>
+
+                <div class="form-group">
+                    <label>Image (Optional)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <div class="file-upload" onclick="document.getElementById('reportImage').click()"
+                            style="cursor: pointer; text-align: center; padding: 1.5rem; border: 2px dashed var(--primary); border-radius: 8px; background: var(--light);">
+                            <i class="fas fa-image"
+                                style="font-size: 1.5rem; color: var(--primary); margin-bottom: 0.5rem; display: block;"></i>
+                            <p style="margin: 0; font-size: 0.9rem;"><strong>Choose Image</strong></p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">From device</p>
+                            <input type="file" id="reportImage" accept="image/*" onchange="previewImage(this)"
+                                style="display: none;">
+                        </div>
+                        <div class="file-upload" onclick="openCameraCapture()"
+                            style="cursor: pointer; text-align: center; padding: 1.5rem; border: 2px dashed var(--success); border-radius: 8px; background: var(--light);">
+                            <i class="fas fa-camera"
+                                style="font-size: 1.5rem; color: var(--success); margin-bottom: 0.5rem; display: block;"></i>
+                            <p style="margin: 0; font-size: 0.9rem;"><strong>Take Photo</strong></p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 0.8rem; color: #6b7280;">Live camera</p>
+                        </div>
+                    </div>
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report User Modal -->
+    <!-- Incident Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Incident Details</h2>
+                <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+            </div>
+            <div id="incidentDetails"></div>
+        </div>
+    </div>
+
+    <!-- Account Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Account Settings</h2>
+                <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="profile-header">
+                <div class="profile-picture-section">
+                    <img id="settingsProfilePicture" class="profile-picture"
+                        src="https://via.placeholder.com/120?text=User" alt="Profile Picture">
+                    <button type="button" class="profile-picture-upload" id="uploadPictureBtn"
+                        title="Upload profile picture">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="profilePictureInput" class="profile-picture-input" accept="image/*">
+                </div>
+                <div class="profile-info">
+                    <h3 id="settingsFullName">Loading...</h3>
+                    <p id="settingsEmail">Loading...</p>
+                    <span id="settingsRoleBadge" class="profile-role-badge"></span>
+                </div>
+            </div>
+
+            <!-- Edit Profile Section -->
+            <div class="settings-section">
+                <h4><i class="fas fa-user"></i> Personal Information</h4>
+                <div class="settings-group">
+                    <label>Full Name</label>
+                    <input type="text" id="settingsFullNameInput" placeholder="Enter your full name">
+                </div>
+                <div class="settings-group">
+                    <label>Email (Cannot be changed)</label>
+                    <input type="email" id="settingsEmailInput" readonly
+                        style="background: var(--light); cursor: not-allowed;">
+                </div>
+                <div class="settings-button-group">
+                    <button type="button" class="btn-save" onclick="saveProfileSettings()">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Password Reset Section -->
+            <div class="settings-section password-reset-section">
+                <h4><i class="fas fa-key"></i> Change Password</h4>
+                <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                    A secure one-time password (OTP) will be sent to your email to verify your identity.
+                </p>
+
+                <!-- Step 1: Request OTP -->
+                <div id="otpRequestContainer" class="otp-request-form active">
+                    <button type="button" class="btn-primary" onclick="requestPasswordResetOTP()" style="width: 100%;">
+                        <i class="fas fa-envelope"></i> Send OTP to Email
+                    </button>
+                </div>
+
+                <!-- Step 2: Verify OTP and Set New Password -->
+                <div id="otpVerifyContainer" class="otp-verify-form">
+                    <div class="settings-group">
+                        <label>Enter OTP from your email</label>
+                        <div class="otp-input-group">
+                            <input type="text" id="resetOTPInput" placeholder="000000" maxlength="6" pattern="[0-9]{6}">
+                        </div>
+                        <small style="color: #6b7280; display: block; text-align: center;">
+                            Check your email for the 6-digit code
+                        </small>
+                    </div>
+
+                    <div class="settings-group">
+                        <label>New Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="resetNewPassword" placeholder="Enter new password">
+                            <button type="button" class="password-toggle" data-target="resetNewPassword"
+                                title="Show/hide password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small style="color: #6b7280; display: block; margin-top: 0.5rem;">
+                            At least 8 characters, 1 uppercase letter, 1 number
+                        </small>
+                    </div>
+
+                    <div class="settings-group">
+                        <label>Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="resetConfirmPassword" placeholder="Confirm new password">
+                            <button type="button" class="password-toggle" data-target="resetConfirmPassword"
+                                title="Show/hide password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-button-group">
+                        <button type="button" class="btn-save" onclick="submitPasswordReset()">
+                            <i class="fas fa-check"></i> Reset Password
+                        </button>
+                        <button type="button" class="btn-cancel" onclick="cancelPasswordReset()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <p style="color: #6b7280; font-size: 0.9rem;">Didn't receive the code?
+                            <a href="#" id="resendResetOtpBtn"
+                                style="color: var(--primary); text-decoration: none;">Resend OTP</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Info Section -->
+            <div class="settings-section">
+                <h4><i class="fas fa-info-circle"></i> Account Information</h4>
+                <div style="color: #6b7280; font-size: 0.9rem;">
+                    <p><strong>Member Since:</strong> <span id="memberSinceDate">Loading...</span></p>
+                    <p><strong>Account Status:</strong> <span
+                            style="color: var(--success); font-weight: 600;">Verified</span></p>
+                    <p><strong>Role:</strong> <span id="accountRole"
+                            style="text-transform: capitalize;">Loading...</span></p>
+                </div>
+            </div>
+
+            <!-- Deactivate Account Section (not for admins) -->
+            <div id="deactivateSection" class="settings-section"
+                style="border: 1px solid #fecaca; background: #fef2f2; border-radius: 8px; padding: 1rem; display: none;">
+                <h4 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> Deactivate Account</h4>
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+                    Deactivating your account will prevent you from logging in. Your data will be preserved and you can
+                    reactivate anytime by contacting an administrator.
+                </p>
+                <button type="button" class="btn-danger" onclick="deactivateOwnAccount()"
+                    style="background: #dc2626; color: white; padding: 0.75rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; width: 100%;">
+                    <i class="fas fa-ban"></i> Deactivate My Account
+                </button>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="settings-button-group">
+                <button type="button" class="btn-danger" onclick="logoutUser()"
+                    style="background: var(--danger); color: white; flex: 1; padding: 0.75rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Capture Modal -->
+    <div id="cameraModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-camera"></i> Capture Photo</h2>
+                <button class="close-btn" onclick="closeCameraModal()">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Camera Video Stream -->
+                <video id="cameraVideo" autoplay playsinline muted
+                    style="width: 100%; border-radius: 8px; background: #000; display: none; transform: scaleX(-1);"></video>
+
+                <!-- Canvas for capturing photo -->
+                <canvas id="cameraCanvas" style="display: none;"></canvas>
+
+                <!-- Photo Preview -->
+                <img id="cameraPhotoPreview" style="width: 100%; border-radius: 8px; display: none;">
+
+                <!-- Camera Controls -->
+                <div id="cameraControls" style="display: flex; gap: 0.75rem; justify-content: center;">
+                    <button type="button" class="btn btn-primary" id="startCameraBtn" onclick="startCamera()"
+                        style="flex: 1;">
+                        <i class="fas fa-play"></i> Start Camera
+                    </button>
+                    <button type="button" class="btn btn-danger" id="stopCameraBtn" onclick="stopCamera()"
+                        style="flex: 1; display: none;">
+                        <i class="fas fa-stop"></i> Stop Camera
+                    </button>
+                </div>
+
+                <!-- Capture Controls -->
+                <div id="captureControls" style="display: flex; gap: 0.75rem; justify-content: center; display: none;">
+                    <button type="button" class="btn btn-success" id="captureBtn" onclick="capturePhoto()"
+                        style="flex: 1;">
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                    <button type="button" class="btn btn-outline" id="retryBtn" onclick="startCamera()"
+                        style="flex: 1; display: none;">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                </div>
+
+                <!-- Use Photo Controls -->
+                <div id="usePhotoControls" style="display: flex; gap: 0.75rem; justify-content: center; display: none;">
+                    <button type="button" class="btn btn-success" id="usePhotoBtn" onclick="useCapture()"
+                        style="flex: 1;">
+                        <i class="fas fa-check"></i> Use Photo
+                    </button>
+                    <button type="button" class="btn btn-outline" id="discardPhotoBtn" onclick="startCamera()"
+                        style="flex: 1;">
+                        <i class="fas fa-trash"></i> Discard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

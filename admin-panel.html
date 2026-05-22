@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Disaster Monitoring System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            overflow: visible;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow-x: auto;
+            overflow-y: visible;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .sidebar-header {
+            padding: 0;
+            border-bottom: none;
+            margin-bottom: 0;
+            flex-shrink: 0;
+            margin-right: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0;
+            opacity: 0;
+            display: none;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            gap: 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .sidebar-menu i {
+            width: auto;
+            text-align: center;
+        }
+
+        .logout-btn {
+            margin-top: 0;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Hamburger Menu Button */
+        .admin-hamburger {
+            display: none;
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 0.65rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+            font-size: 1.1rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .admin-hamburger:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: scale(1.08);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Back to Main Button in Sidebar */
+        .back-to-main-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .back-to-main-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            height: auto;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            gap: 0.75rem;
+        }
+
+        .topbar-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+            transform: translateX(-2px);
+        }
+
+        .topbar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .admin-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .stat-card.danger {
+            border-left-color: #ef4444;
+        }
+
+        .stat-card.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .stat-card.success {
+            border-left-color: #10b981;
+        }
+
+        .stat-info h3 {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            color: #ddd;
+            flex-shrink: 0;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            gap: 0.75rem;
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .search-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-reported {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-responding {
+            background: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .status-in_area {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .severity-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .severity-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .severity-high {
+            background: #fed7aa;
+            color: #b45309;
+        }
+
+        .severity-critical {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .severity-neutral {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .role-user {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .role-barangay {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .role-admin {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.65rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .pagination-btn:hover,
+        .pagination-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading and Messages */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 767px) {
+            .admin-hamburger {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 280px;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+                flex-direction: column;
+                padding: 1rem 0;
+                overflow-y: auto;
+            }
+
+            .sidebar-header {
+                padding: 0 1rem 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-subtitle {
+                font-size: 0.875rem;
+                opacity: 0.9;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-menu {
+                flex-direction: column;
+                overflow-x: visible;
+                overflow-y: auto;
+                gap: 0;
+            }
+
+            .sidebar-menu li {
+                margin: 0;
+                white-space: normal;
+            }
+
+            .sidebar-menu a {
+                border-bottom: none;
+                border-left: 4px solid transparent;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active {
+                border-left-color: white;
+                border-bottom-color: transparent;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .topbar {
+                padding-left: 3.5rem;
+            }
+
+            .topbar-left {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        /* Responsive - Tablet and above */
+        @media (min-width: 768px) {
+            .admin-hamburger {
+                display: none !important;
+            }
+
+            .admin-container {
+                flex-direction: row;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .sidebar {
+                width: 200px;
+                padding: 1rem 0;
+                flex-direction: column;
+                position: relative;
+                top: auto;
+                z-index: 10;
+                overflow-y: auto;
+                overflow-x: visible;
+            }
+
+            .sidebar-header {
+                padding: 0 1rem 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-subtitle {
+                font-size: 0.875rem;
+                opacity: 0.9;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-title {
+                font-size: 1.25rem;
+            }
+
+            .sidebar-menu {
+                flex-direction: column;
+                overflow-x: visible;
+            }
+
+            .sidebar-menu a {
+                border-bottom: none;
+                border-left: 4px solid transparent;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            .sidebar-menu a:hover,
+            .sidebar-menu a.active {
+                border-left-color: white;
+                border-bottom-color: transparent;
+            }
+
+            .logout-btn {
+                margin: 1rem;
+                margin-top: auto;
+                width: calc(100% - 2rem);
+            }
+
+            .main-content {
+                overflow: hidden;
+                height: 100vh;
+            }
+
+            .topbar {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem 2rem;
+                gap: 0;
+            }
+
+            .topbar-left {
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .topbar-title {
+                font-size: 1.5rem;
+            }
+
+            .admin-user {
+                gap: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+
+            .admin-user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .content-area {
+                padding: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                padding: 2rem;
+            }
+
+            .stat-info h3 {
+                font-size: 0.875rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .stat-icon {
+                font-size: 2.5rem;
+            }
+
+            .table-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+
+            .table-controls {
+                flex-direction: row;
+                gap: 1rem;
+                align-items: center;
+                width: auto;
+            }
+
+            .search-input {
+                width: 250px;
+            }
+
+            .modal-content {
+                width: 90%;
+                max-width: 500px;
+                padding: 2rem;
+            }
+
+            .modal-header {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+
+            .form-actions {
+                flex-direction: row;
+                justify-content: flex-end;
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.95rem;
+                gap: 0.5rem;
+            }
+
+            table {
+                font-size: 0.95rem;
+            }
+
+            th {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+
+            td {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar {
+                width: 280px;
+            }
+
+            .sidebar-header {
+                padding: 0 2rem 2rem;
+            }
+
+            .sidebar-menu a {
+                padding: 1rem 2rem;
+                gap: 1rem;
+            }
+
+            .logout-btn {
+                margin: 2rem;
+                margin-top: auto;
+                width: calc(100% - 4rem);
+            }
+
+            .topbar {
+                padding: 1.5rem 2rem;
+            }
+
+            .content-area {
+                padding: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                padding: 2rem;
+            }
+
+            .search-input {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Hamburger Menu (Mobile Only) -->
+        <button class="admin-hamburger" id="adminHamburger" title="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <button class="back-to-main-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Main
+                </button>
+                <div class="sidebar-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Admin Panel
+                </div>
+                <div class="sidebar-subtitle">Disaster Monitoring System</div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><a onclick="switchSection('dashboard', this)" class="menu-item active">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a></li>
+                <li><a onclick="switchSection('users', this)" class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>User Management</span>
+                    </a></li>
+                <li><a onclick="switchSection('stats', this)" class="menu-item">
+                        <i class="fas fa-bar-chart"></i>
+                        <span>Statistics</span>
+                    </a></li>
+                <li><a onclick="switchSection('audit_logs', this)" class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>Audit Logs</span>
+                    </a></li>
+            </ul>
+
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-title" id="pageTitle">Dashboard</div>
+                </div>
+                <div class="admin-user">
+                    <div class="admin-user-avatar" id="userInitial">A</div>
+                    <div>
+                        <div id="adminName" style="font-weight: 600;">Admin User</div>
+                        <div style="font-size: 0.85rem; color: #999;">Administrator</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div id="alertContainer"></div>
+
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">Recent Incidents</div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="recentIncidentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>Title</th>
+                                        <th>Reporter</th>
+                                        <th>Status</th>
+                                        <th>Severity</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentIncidentsBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div id="users" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">User Management</div>
+                            <div class="table-controls">
+                                <input type="text" class="search-input" id="userSearch"
+                                    placeholder="Search by email or name...">
+                                <button class="btn btn-primary" onclick="openCreateUserModal()">
+                                    <i class="fas fa-user-plus"></i> New User
+                                </button>
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="usersPagination"></div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div id="stats" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">Incident Statistics</div>
+                        </div>
+                        <div style="padding: 2rem;">
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                                <div>
+                                    <h3 style="margin-bottom: 1rem; color: #333; font-weight: 600;">By Status</h3>
+                                    <div id="statusStatsContainer"
+                                        style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                                </div>
+                                <div>
+                                    <h3 style="margin-bottom: 1rem; color: #333; font-weight: 600;">By Disaster Type
+                                    </h3>
+                                    <div id="disasterStatsContainer"
+                                        style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                                </div>
+                                <div>
+                                    <h3 style="margin-bottom: 1rem; color: #333; font-weight: 600;">By Severity</h3>
+                                    <div id="severityStatsContainer"
+                                        style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Logs Section -->
+                <div id="audit_logs" class="section">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">Audit Logs</div>
+                            <div class="table-controls">
+                                <input type="date" id="auditDateFrom" onchange="loadAuditLogs()" placeholder="From">
+                                <input type="date" id="auditDateTo" onchange="loadAuditLogs()" placeholder="To">
+                                <select id="auditActionFilter" onchange="loadAuditLogs()" style="margin-left: 0.5rem;">
+                                    <option value="">All Actions</option>
+                                    <option value="CREATE">Create</option>
+                                    <option value="UPDATE">Update</option>
+                                    <option value="DELETE">Delete</option>
+                                    <option value="CONFIRM">Confirm</option>
+                                    <option value="REACT">React</option>
+                                </select>
+                                <select id="auditEntityFilter" onchange="loadAuditLogs()" style="margin-left: 0.5rem;">
+                                    <option value="">All Types</option>
+                                    <option value="incident">Incidents</option>
+                                    <option value="user">Users</option>
+                                    <option value="comment">Comments</option>
+                                    <option value="chat_message">Chat Messages</option>
+                                </select>
+                                <button class="btn btn-primary" onclick="exportAuditLogs()"
+                                    style="margin-left: 0.5rem;">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="auditLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Action</th>
+                                        <th>Entity Type</th>
+                                        <th>Entity ID</th>
+                                        <th>Details</th>
+                                        <th>Image</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditLogsBody">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="auditLogsPagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="userModalTitle">Create New User</span>
+                <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+            </div>
+            <form onsubmit="handleUserSubmit(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="userFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="userRole" required>
+                        <option value="user">User</option>
+                        <option value="barangay">Barangay</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group" id="passwordGroup">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit User</span>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <form onsubmit="handleEditUserSubmit(event)">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editUserFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editUserEmail" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="editUserRole" required>
+                        <option value="user">User</option>
+                        <option value="barangay">Barangay</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>New Password (leave blank to keep current)</label>
+                    <input type="password" id="editUserPassword" placeholder="Enter new password or leave blank">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('editUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Incident Modal -->
+    <div id="editIncidentModal" class="modal" style="display: none !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit Incident</span>
+                <button class="modal-close" onclick="closeModal('editIncidentModal')">&times;</button>
+            </div>
+            <form onsubmit="handleEditIncidentSubmit(event)">
+                <input type="hidden" id="editIncidentId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="editIncidentTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editIncidentDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Disaster Type</label>
+                    <select id="editIncidentType" required>
+                        <option value="">Select Type</option>
+                        <option value="fire">Fire</option>
+                        <option value="flood">Flood</option>
+                        <option value="earthquake">Earthquake</option>
+                        <option value="typhoon">Typhoon</option>
+                        <option value="landslide">Landslide</option>
+                        <option value="accident">Accident</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editIncidentStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="reported">Reported</option>
+                        <option value="responding">Responding</option>
+                        <option value="in_area">In Area</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Severity</label>
+                    <select id="editIncidentSeverity">
+                        <option value="">Select Severity</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('editIncidentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Incident</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUserPage = 1;
+        let currentIncidentPage = 1;
+        let currentAdminUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check if user is admin
+                const response = await fetch('/disaster-report/auth.php?action=check', { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`Authentication server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.authenticated || data.user.role !== 'admin') {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentAdminUser = data.user;
+                document.getElementById('adminName').textContent = data.user.full_name;
+                document.getElementById('userInitial').textContent = data.user.full_name.charAt(0).toUpperCase();
+
+                // Load dashboard
+                loadDashboard();
+
+                // Set up event listeners
+                document.getElementById('userSearch').addEventListener('input', debounce(() => {
+                    currentUserPage = 1;
+                    loadUsers();
+                }, 500));
+
+                // Hamburger menu for mobile
+                const adminHamburger = document.getElementById('adminHamburger');
+                const adminSidebar = document.getElementById('adminSidebar');
+                if (adminHamburger) {
+                    adminHamburger.addEventListener('click', () => {
+                        adminSidebar.classList.toggle('open');
+                    });
+                }
+
+                // Close sidebar when clicking on menu items
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                            adminSidebar.classList.remove('open');
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showAlert('Failed to initialize admin panel: ' + error.message, 'error');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        });
+
+        // Switch sections
+        function switchSection(section, element) {
+            // Update active menu item
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(section).classList.add('active');
+
+            // Update page title
+            const titles = {
+                dashboard: 'Dashboard',
+                users: 'User Management',
+                stats: 'Statistics',
+                audit_logs: 'Audit Logs'
+            };
+            document.getElementById('pageTitle').textContent = titles[section];
+
+            // Load data for section
+            if (section === 'users') loadUsers();
+            if (section === 'stats') loadStats();
+            if (section === 'audit_logs') loadAuditLogs();
+        }
+
+        // Dashboard Functions
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/disaster-report/admin.php?action=get_dashboard_stats', { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown error');
+                }
+
+                // Render stats cards
+                const statsHTML = `
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3>Total Users</h3>
+                            <div class="stat-number">${data.total_users || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-info">
+                            <h3>Active Incidents</h3>
+                            <div class="stat-number">${data.active_incidents || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-info">
+                            <h3>Total Incidents</h3>
+                            <div class="stat-number">${data.total_incidents || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-info">
+                            <h3>Recent (7 Days)</h3>
+                            <div class="stat-number">${data.recent_incidents || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid #f97316;">
+                        <div class="stat-info">
+                            <h3>Deactivated Accounts</h3>
+                            <div class="stat-number">${data.deactivated_accounts || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-ban"></i></div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+                        <div class="stat-info">
+                            <h3>Unverified Accounts</h3>
+                            <div class="stat-number">${data.unverified_accounts || 0}</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    </div>
+                `;
+                document.getElementById('statsGrid').innerHTML = statsHTML;
+
+                // Load recent incidents
+                loadRecentIncidents();
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                showAlert('Error loading dashboard: ' + error.message, 'error');
+            }
+        }
+
+        async function loadRecentIncidents() {
+            try {
+                const response = await fetch('/disaster-report/admin.php?action=get_all_incidents&page=1&limit=5', { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error || 'Unknown error');
+
+                const tbody = document.getElementById('recentIncidentsBody');
+                if (!data.incidents || data.incidents.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No incidents found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.incidents.map(incident => `
+                    <tr>
+                        <td>#${incident.id}</td>
+                        <td>${capitalize(incident.disaster_type)}</td>
+                        <td>${incident.title}</td>
+                        <td>${incident.full_name}</td>
+                        <td><span class="status-badge status-${incident.status}">${capitalize(incident.status.replace('_', ' '))}</span></td>
+                        <td><span class="status-badge severity-${incident.severity || 'neutral'}">${capitalize(incident.severity || 'Unset')}</span></td>
+                        <td>${formatDate(incident.created_at)}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Recent incidents error:', error);
+                document.getElementById('recentIncidentsBody').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error loading incidents</td></tr>';
+            }
+        }
+
+        // User Management Functions
+        async function loadUsers() {
+            try {
+                const search = document.getElementById('userSearch').value;
+                let url = '/disaster-report/admin.php?action=get_all_users&page=' + currentUserPage;
+                if (search) url += '&search=' + encodeURIComponent(search);
+
+                const response = await fetch(url, { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error || 'Failed to load users');
+
+                // Render users table
+                const tbody = document.getElementById('usersBody');
+                if (data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No users found</td></tr>';
+                } else {
+                    tbody.innerHTML = data.users.map(user => `
+                        <tr>
+                            <td>#${user.id}</td>
+                            <td>${user.full_name}</td>
+                            <td>${user.email}</td>
+                            <td><span class="role-badge role-${user.role}">${capitalize(user.role)}</span></td>
+                            <td>${formatDate(user.created_at)}</td>
+                            <td>
+                                <button class="btn btn-primary btn-small" onclick="openEditUserModal(${user.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${parseInt(user.is_active) ? `<button class="btn btn-warning btn-small" onclick="deactivateUser(${user.id})"><i class="fas fa-ban"></i></button>` : `<button class="btn btn-success btn-small" onclick="reactivateUser(${user.id})"><i class="fas fa-check"></i></button>`}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Render pagination
+                renderPagination('usersPagination', data.current_page, data.pages, (page) => {
+                    currentUserPage = page;
+                    loadUsers();
+                });
+            } catch (error) {
+                showAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/disaster-report/admin.php?action=get_incident_stats', { credentials: 'include' });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error || 'Failed to load statistics');
+
+                // Render status stats
+                const statusContainer = document.getElementById('statusStatsContainer');
+                statusContainer.innerHTML = Object.entries(data.status_stats).map(([status, count]) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="status-badge status-${status}">${capitalize(status.replace('_', ' '))}</span>
+                        <strong>${count}</strong>
+                    </div>
+                `).join('');
+
+                // Render disaster stats
+                const disasterContainer = document.getElementById('disasterStatsContainer');
+                disasterContainer.innerHTML = Object.entries(data.disaster_stats).map(([type, count]) => `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>${capitalize(type)}</span>
+                        <strong>${count}</strong>
+                    </div>
+                `).join('');
+
+                // Render severity stats
+                const severityContainer = document.getElementById('severityStatsContainer');
+                severityContainer.innerHTML = Object.entries(data.severity_stats).map(([severity, count]) => `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="status-badge severity-${severity.toLowerCase() || 'neutral'}">${capitalize(severity)}</span>
+                        <strong>${count}</strong>
+                    </div>
+                `).join('');
+            } catch (error) {
+                showAlert('Error loading statistics: ' + error.message, 'error');
+            }
+        }
+
+        // Modal Functions
+        function openCreateUserModal() {
+            document.getElementById('userModalTitle').textContent = 'Create New User';
+            document.getElementById('userFullName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userRole').value = 'user';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('passwordGroup').style.display = 'block';
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        async function openEditUserModal(userId) {
+            try {
+                const response = await fetch(`/disaster-report/admin.php?action=get_user&user_id=${userId}`, { credentials: 'include' });
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error);
+
+                const user = data.user;
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editUserFullName').value = user.full_name;
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserRole').value = user.role;
+                document.getElementById('editUserModal').classList.add('active');
+            } catch (error) {
+                showAlert('Error loading user: ' + error.message, 'error');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        async function handleUserSubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('action', 'create_user');
+            formData.append('full_name', document.getElementById('userFullName').value);
+            formData.append('email', document.getElementById('userEmail').value);
+            formData.append('role', document.getElementById('userRole').value);
+            formData.append('password', document.getElementById('userPassword').value);
+
+            try {
+                const response = await fetch('/disaster-report/admin.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('User created successfully', 'success');
+                    closeModal('userModal');
+                    loadUsers();
+                } else {
+                    showAlert(data.error || 'Error creating user', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function handleEditUserSubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('action', 'update_user');
+            formData.append('user_id', document.getElementById('editUserId').value);
+            formData.append('full_name', document.getElementById('editUserFullName').value);
+            formData.append('role', document.getElementById('editUserRole').value);
+            const newPassword = document.getElementById('editUserPassword').value;
+            if (newPassword) {
+                formData.append('password', newPassword);
+            }
+
+            try {
+                const response = await fetch('/disaster-report/admin.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('User updated successfully', 'success');
+                    closeModal('editUserModal');
+                    loadUsers();
+                } else {
+                    showAlert(data.error || 'Error updating user', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function deactivateUser(userId) {
+            if (!confirm('Are you sure you want to deactivate this user? They will not be able to login.')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'deactivate_user');
+            formData.append('user_id', userId);
+
+            try {
+                const response = await fetch('/disaster-report/api.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    loadUsers();
+                    loadDashboard(); // Refresh dashboard stats
+                } else {
+                    showAlert(data.error || 'Error deactivating user', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function reactivateUser(userId) {
+            if (!confirm('Are you sure you want to reactivate this user? They will be able to login again.')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'reactivate_user');
+            formData.append('user_id', userId);
+
+            try {
+                const response = await fetch('/disaster-report/api.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    loadUsers();
+                    loadDashboard(); // Refresh dashboard stats
+                } else {
+                    showAlert(data.error || 'Error reactivating user', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteIncident(incidentId) {
+            if (!confirm('Are you sure you want to delete this incident? This action cannot be undone.')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'delete_incident');
+            formData.append('incident_id', incidentId);
+
+            try {
+                const response = await fetch('/disaster-report/admin.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Incident deleted successfully', 'success');
+                    loadIncidents();
+                } else {
+                    showAlert(data.error || 'Error deleting incident', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function openEditIncidentModal(incidentId) {
+            try {
+                const response = await fetch(`/disaster-report/admin.php?action=get_incident&incident_id=${incidentId}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error || 'Failed to load incident');
+
+                const incident = data.incident;
+                document.getElementById('editIncidentId').value = incident.id;
+                document.getElementById('editIncidentTitle').value = incident.title;
+                document.getElementById('editIncidentDescription').value = incident.description || '';
+                document.getElementById('editIncidentType').value = incident.disaster_type;
+                document.getElementById('editIncidentStatus').value = incident.status;
+                document.getElementById('editIncidentSeverity').value = incident.severity || '';
+
+                document.getElementById('editIncidentModal').classList.add('active');
+            } catch (error) {
+                showAlert('Error loading incident: ' + error.message, 'error');
+            }
+        }
+
+        async function handleEditIncidentSubmit(event) {
+            event.preventDefault();
+
+            const formData = new FormData();
+            formData.append('action', 'update_incident');
+            formData.append('incident_id', document.getElementById('editIncidentId').value);
+            formData.append('title', document.getElementById('editIncidentTitle').value);
+            formData.append('description', document.getElementById('editIncidentDescription').value);
+            formData.append('disaster_type', document.getElementById('editIncidentType').value);
+            formData.append('status', document.getElementById('editIncidentStatus').value);
+            formData.append('severity', document.getElementById('editIncidentSeverity').value);
+
+            try {
+                const response = await fetch('/disaster-report/admin.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Incident updated successfully', 'success');
+                    closeModal('editIncidentModal');
+                    loadIncidents();
+                } else {
+                    showAlert(data.error || 'Error updating incident', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Helper Functions
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.innerHTML = message;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function capitalize(str) {
+            return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function renderPagination(containerId, currentPage, totalPages, onPageChange) {
+            const container = document.getElementById(containerId);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            if (currentPage > 1) {
+                html += `<button class="pagination-btn" onclick="arguments[0].stopPropagation(); this.onclick = () => { arguments[1](${currentPage - 1}); }"><i class="fas fa-chevron-left"></i></button>`;
+            }
+
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="arguments[0].stopPropagation(); arguments[1](${i})">${i}</button>`;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<button class="pagination-btn" onclick="arguments[0].stopPropagation(); arguments[1](${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+            }
+
+            container.innerHTML = html;
+
+            // Add click listeners
+            container.querySelectorAll('.pagination-btn').forEach((btn, idx) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const text = btn.textContent.trim();
+                    if (text.includes('chevron-left')) {
+                        onPageChange(currentPage - 1);
+                    } else if (text.includes('chevron-right')) {
+                        onPageChange(currentPage + 1);
+                    } else {
+                        onPageChange(parseInt(text));
+                    }
+                });
+            });
+        }
+
+        // Audit Log Functions
+        async function loadAuditLogs(page = 1) {
+            try {
+                const dateFrom = document.getElementById('auditDateFrom').value || '';
+                const dateTo = document.getElementById('auditDateTo').value || '';
+                const actionType = document.getElementById('auditActionFilter').value || '';
+                const entityType = document.getElementById('auditEntityFilter').value || '';
+
+                const params = new URLSearchParams({
+                    action: 'get_audit_logs',
+                    page: page,
+                    limit: 50,
+                    ...(dateFrom && { date_from: dateFrom }),
+                    ...(dateTo && { date_to: dateTo }),
+                    ...(actionType && { action_type: actionType }),
+                    ...(entityType && { entity_type: entityType })
+                });
+
+                const response = await fetch(`/disaster-report/api.php?${params.toString()}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (!data.success) {
+                    showAlert('Error loading audit logs', 'error');
+                    return;
+                }
+
+                const tbody = document.getElementById('auditLogsBody');
+                tbody.innerHTML = '';
+
+                if (data.logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No audit logs found</td></tr>';
+                    return;
+                }
+
+                data.logs.forEach(log => {
+                    const row = document.createElement('tr');
+                    const timestamp = new Date(log.created_at).toLocaleString();
+
+                    let detailsText = log.details || '';
+                    if (log.old_value || log.new_value) {
+                        detailsText += ` [${log.old_value ? 'Before: ' + log.old_value.substring(0, 30) + '...' : ''} ${log.new_value ? 'After: ' + log.new_value.substring(0, 30) + '...' : ''}]`;
+                    }
+
+                    const imageCell = log.image_path ?
+                        `<img src="${log.image_path}" style="max-width: 50px; max-height: 50px; cursor: pointer; border-radius: 4px;" onclick="viewIncidentImage('${log.image_path}')">` :
+                        '-';
+
+                    row.innerHTML = `
+                        <td>${timestamp}</td>
+                        <td>${log.user_name || 'System'}</td>
+                        <td><span class="badge" style="background: ${getRoleBadgeColor(log.user_role)};">${log.user_role || 'N/A'}</span></td>
+                        <td><span class="badge" style="background: ${getActionBadgeColor(log.action_type)};">${log.action_type}</span></td>
+                        <td>${log.entity_type}</td>
+                        <td>#${log.entity_id}</td>
+                        <td><small>${detailsText}</small></td>
+                        <td>${imageCell}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Update pagination
+                const pagination = document.getElementById('auditLogsPagination');
+                pagination.innerHTML = '';
+                for (let i = 1; i <= data.pages; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.className = 'pagination-btn' + (i === page ? ' active' : '');
+                    btn.onclick = () => loadAuditLogs(i);
+                    pagination.appendChild(btn);
+                }
+            } catch (error) {
+                console.error('Error loading audit logs:', error);
+                showAlert('Error loading audit logs', 'error');
+            }
+        }
+
+        function getRoleBadgeColor(role) {
+            const colors = {
+                admin: '#667eea',
+                barangay: '#f6ad55',
+                user: '#48bb78'
+            };
+            return colors[role] || '#ccc';
+        }
+
+        function getActionBadgeColor(action) {
+            const colors = {
+                CREATE: '#48bb78',
+                UPDATE: '#4299e1',
+                DELETE: '#f56565',
+                CONFIRM: '#805ad5',
+                REACT: '#ed8936'
+            };
+            return colors[action] || '#ccc';
+        }
+
+        function viewIncidentImage(imagePath) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.onclick = () => modal.remove();
+            modal.innerHTML = `
+                <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 90%; max-height: 90%;" onclick="event.stopPropagation()">
+                    <img src="${imagePath}" style="width: 100%; height: auto; border-radius: 8px;">
+                    <button onclick="this.closest('.modal').remove()" style="position: absolute; top: 10px; right: 10px; background: #333; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function exportAuditLogs() {
+            const table = document.getElementById('auditLogsTable');
+            let csv = 'Time,User,Role,Action,Entity Type,Entity ID,Details\n';
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0 && cells[0].textContent !== 'No audit logs found') {
+                    const data = [
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        cells[4].textContent,
+                        cells[5].textContent,
+                        cells[6].textContent.replace(/"/g, '""')
+                    ];
+                    csv += `"${data.join('","')}"\n`;
+                }
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                fetch('/disaster-report/auth.php?action=logout', { credentials: 'include' }).then(() => {
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
