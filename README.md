@@ -1,6 +1,6 @@
 # 🚨 Disaster Monitoring & Response System
 
-A comprehensive web-based platform for real-time disaster incident reporting, tracking, and management. Enables citizens to report disasters, government agencies to respond, and administrators to oversee operations.
+A full-featured web-based disaster management platform built for real-time incident reporting, monitoring, and emergency response coordination. The system allows citizens to submit disaster reports, government agencies to respond efficiently, and administrators to manage and oversee operations seamlessly.
 
 ## ✨ Core Features
 
