@@ -1,4 +1,4 @@
-# 🚨 Disaster Monitoring & Response System
+# 🚨 Barangay Disaster Monitoring System (BDMS)
 
 Web-based disaster management platform for real-time incident reporting, monitoring, and emergency response coordination. Enables citizens to submit disaster reports, agencies to respond efficiently, and administrators to manage operations seamlessly. 
 
